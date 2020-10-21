@@ -1,0 +1,130 @@
+---
+title: "R Notebook"
+output:    
+  html_document:
+    keep_tex: true
+---
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+
+This is where I keep all of my notes & working thoughts on figure generation. When you "Knit" the R Notebook, it converts this markdown file to either PDF or HTML. This format is useful in place of creating a powerpoint of your figures, you can integrate your code and annotations all in one! And send to others as a single document. 
+
+This first chunk is the setup chunk. Currently, this will not appear in your knitted document because of "include=FALSE" (i.e. don't include this chunk in the output). You can always remove "include=FALSE" argument from the brackets to make more transparent what was required for your notebook. 
+
+**Here we do 4 things in the set up brackets:**
+
+1. Designate this is R code (you can run other languages)
+2. Load the built-in cars dataset
+3. indicate global options are being set
+4. indicate do NOT inclue this chunk in the knit document
+
+**Then, set knitr options:** *Specifically, we tell knitr how to create figures and where to write them out (i.e. our repository!)*
+
+**Then, we load any necessary packages used in the .Rmd**
+
+```{r cars, global_options, include=FALSE}
+
+knitr:: opts_chunk$set(fig.width=12,fig.height=8,dev = c('jpeg'), fig.path='figures/',echo=TRUE, warning=FALSE, message=FALSE)
+
+library(ggplot2)
+library(ggthemes)
+
+```
+
+Above, I changed the font (bold, italicized), but there are built-in ways to organize your document. Different headings, as seen below, are useufl for guiding readers through a more "outlined" document. 
+
+# Now we start plotting!
+
+## Using built-in R data & Base R
+
+### Don't forget to name the chunk!
+```{r Cars-speed_dist}
+cars
+
+plot(cars$speed,cars$dist)
+
+plot(cars$dist,cars$speed)
+
+write.csv(cars)
+
+```
+
+
+# Plot Midwest Data
+
+## Use ggplot
+
+### Learn about plot strucure & themes!
+
+
+```{r midwest}
+
+data("midwest", package = "ggplot2")
+
+midwest_df<-as.data.frame(midwest)
+
+# Scatterplot
+gg <- ggplot(midwest, aes(x=area, y=poptotal)) + 
+  geom_point(aes(col=state, size=popdensity)) + 
+  geom_smooth(method="loess", se=F) + 
+  xlim(c(0, 0.1)) + 
+  ylim(c(0, 500000)) + 
+  labs(subtitle="Area Vs Population", 
+       y="Population", 
+       x="Area", 
+       title="Scatterplot", 
+       caption = "Source: midwest")
+
+gg_themed<- gg +  theme_tufte()
+
+plot(gg)
+
+plot(gg_themed)
+
+```
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+# Some additional functionality with ggplot & Markdown
+
+## In-line code!
+
+There are `r nrow(midwest_df)` records in the Midwest dataset. 
+
+### Can create a variety of graphics 
+
+```{r}
+
+options(scipen = 999)
+library(ggplot2)
+library(ggalt)
+midwest_select <- midwest[midwest$poptotal > 350000 & 
+                            midwest$poptotal <= 500000 & 
+                            midwest$area > 0.01 & 
+                            midwest$area < 0.1, ]
+
+# Plot
+ggplot(midwest, aes(x=area, y=poptotal)) + 
+  geom_point(aes(col=state, size=popdensity)) +   # draw points
+  geom_smooth(method="loess", se=F) + 
+  xlim(c(0, 0.1)) + 
+  ylim(c(0, 500000)) +   # draw smoothing line
+  geom_encircle(aes(x=area, y=poptotal), 
+                data=midwest_select, 
+                color="red", 
+                size=2, 
+                expand=0.08) +   # encircle
+  labs(subtitle="Area Vs Population", 
+       y="Population", 
+       x="Area", 
+       title="Scatterplot + Encircle", 
+       caption="Source: midwest")
+
+```
+
+
+```{r}
+
+# do some other plot 
